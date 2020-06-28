@@ -1,5 +1,6 @@
 package net.dreamlu.mica.test.utils;
 
+import net.dreamlu.mica.core.utils.DatePattern;
 import net.dreamlu.mica.core.utils.DateUtil;
 import org.junit.Assert;
 import org.junit.Test;
@@ -20,7 +21,7 @@ public class DateUtilTest {
 	 * Method: plusYears(Date date, int yearsToAdd)
 	 */
 	@Test
-	public void testPlusYears() throws Exception {
+	public void testPlusYears() {
 		Date date = new Date();
 		Date date1 = DateUtil.plusYears(date, 1);
 
@@ -37,9 +38,10 @@ public class DateUtilTest {
 	 * Method: plusMonths(Date date, int monthsToAdd)
 	 */
 	@Test
-	public void testPlusMonths() throws Exception {
+	public void testPlusMonths() {
 		Date date = new Date();
 		Date date1 = DateUtil.plusMonths(date, 1);
+		DateUtil.plusWeeks(date, 1);
 
 		Calendar c = Calendar.getInstance();
 		c.setTime(date);
@@ -54,7 +56,7 @@ public class DateUtilTest {
 	 * Method: plusDays(Date date, long daysToAdd)
 	 */
 	@Test
-	public void testPlusDays() throws Exception {
+	public void testPlusDays() {
 		Date date = new Date();
 		Date date1 = DateUtil.plusDays(date, 1);
 
@@ -71,7 +73,7 @@ public class DateUtilTest {
 	 * Method: minusYears(Date date, int years)
 	 */
 	@Test
-	public void testMinusYears() throws Exception {
+	public void testMinusYears() {
 		Date date = new Date();
 		Date date1 = DateUtil.minusYears(date, 1);
 
@@ -88,9 +90,10 @@ public class DateUtilTest {
 	 * Method: minusMonths(Date date, int months)
 	 */
 	@Test
-	public void testMinusMonths() throws Exception {
+	public void testMinusMonths() {
 		Date date = new Date();
 		Date date1 = DateUtil.minusMonths(date, 1);
+		DateUtil.minusWeeks(date, 1);
 
 		Calendar c = Calendar.getInstance();
 		c.setTime(date);
@@ -105,7 +108,7 @@ public class DateUtilTest {
 	 * Method: minusDays(Date date, long days)
 	 */
 	@Test
-	public void testMinusDays() throws Exception {
+	public void testMinusDays() {
 		Date date = new Date();
 		Date date1 = DateUtil.minusDays(date, 1);
 
@@ -119,8 +122,33 @@ public class DateUtilTest {
 	}
 
 	@Test
-	public void testDate() throws Exception {
+	public void testDate() {
 		Date date = new Date();
 		System.out.println(DateUtil.formatDateTime(date));
 	}
+
+	@Test
+	public void testDateParse() {
+		Date date = DateUtil.parse("2020-04-23", DatePattern.NORM_DATE_PATTERN);
+		System.out.println(date);
+		String format = DateUtil.format(date, DatePattern.NORM_DATE_PATTERN);
+		System.out.println(format);
+	}
+
+	@Test
+	public void testTimeParse() {
+		Date date = DateUtil.parse("16:12:12", DatePattern.NORM_TIME_FORMAT);
+		System.out.println(date);
+		String format = DateUtil.format(date, DatePattern.NORM_TIME_PATTERN);
+		System.out.println(format);
+	}
+
+	@Test
+	public void testDateTimeParse() {
+		Date date = DateUtil.parse("2020-04-23 16:12:12", DatePattern.NORM_DATETIME_FORMAT);
+		System.out.println(date);
+		String format = DateUtil.format(date, DatePattern.NORM_DATETIME_PATTERN);
+		System.out.println(format);
+	}
+
 }

@@ -18,16 +18,14 @@ package net.dreamlu.mica.core.utils;
 
 import lombok.experimental.UtilityClass;
 import org.springframework.lang.Nullable;
-import org.springframework.util.Assert;
 
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
-import java.time.temporal.Temporal;
-import java.time.temporal.TemporalAccessor;
-import java.time.temporal.TemporalAmount;
-import java.time.temporal.TemporalQuery;
+import java.time.temporal.*;
 import java.util.*;
+
+import static java.time.temporal.ChronoField.*;
 
 /**
  * 日期工具类
@@ -54,7 +52,7 @@ public class DateUtil {
 	 * @return 设置后的时间
 	 */
 	public static Date plusYears(Date date, int yearsToAdd) {
-		return DateUtil.set(date, Calendar.YEAR, yearsToAdd);
+		return DateUtil.plusAtUtc(date, Period.ofYears(yearsToAdd));
 	}
 
 	/**
@@ -65,7 +63,7 @@ public class DateUtil {
 	 * @return 设置后的时间
 	 */
 	public static Date plusMonths(Date date, int monthsToAdd) {
-		return DateUtil.set(date, Calendar.MONTH, monthsToAdd);
+		return DateUtil.plusAtUtc(date, Period.ofMonths(monthsToAdd));
 	}
 
 	/**
@@ -152,9 +150,27 @@ public class DateUtil {
 	 * @param amount 时间量
 	 * @return 设置后的时间
 	 */
+	public static Date plusAtUtc(Date date, TemporalAmount amount) {
+		Objects.requireNonNull(date, "The date must not be null");
+		Instant instant = date.toInstant()
+			.atZone(ZoneOffset.UTC)
+			.plus(amount)
+			.toInstant();
+		return Date.from(instant);
+	}
+
+	/**
+	 * 日期添加时间量
+	 *
+	 * @param date   时间
+	 * @param amount 时间量
+	 * @return 设置后的时间
+	 */
 	public static Date plus(Date date, TemporalAmount amount) {
-		Instant instant = date.toInstant();
-		return Date.from(instant.plus(amount));
+		Objects.requireNonNull(date, "The date must not be null");
+		Instant instant = date.toInstant()
+			.plus(amount);
+		return Date.from(instant);
 	}
 
 	/**
@@ -165,7 +181,7 @@ public class DateUtil {
 	 * @return 设置后的时间
 	 */
 	public static Date minusYears(Date date, int years) {
-		return DateUtil.set(date, Calendar.YEAR, -years);
+		return DateUtil.minusAtUtc(date, Period.ofYears(years));
 	}
 
 	/**
@@ -176,7 +192,7 @@ public class DateUtil {
 	 * @return 设置后的时间
 	 */
 	public static Date minusMonths(Date date, int months) {
-		return DateUtil.set(date, Calendar.MONTH, -months);
+		return DateUtil.minusAtUtc(date, Period.ofMonths(months));
 	}
 
 	/**
@@ -263,26 +279,27 @@ public class DateUtil {
 	 * @param amount 时间量
 	 * @return 设置后的时间
 	 */
-	public static Date minus(Date date, TemporalAmount amount) {
-		Instant instant = date.toInstant();
-		return Date.from(instant.minus(amount));
+	public static Date minusAtUtc(Date date, TemporalAmount amount) {
+		Objects.requireNonNull(date, "The date must not be null");
+		Instant instant = date.toInstant()
+			.atZone(ZoneOffset.UTC)
+			.minus(amount)
+			.toInstant();
+		return Date.from(instant);
 	}
 
 	/**
-	 * 设置日期属性
+	 * 日期减少时间量
 	 *
-	 * @param date          时间
-	 * @param calendarField 更改的属性
-	 * @param amount        更改数，-1表示减少
+	 * @param date   时间
+	 * @param amount 时间量
 	 * @return 设置后的时间
 	 */
-	private static Date set(Date date, int calendarField, int amount) {
-		Assert.notNull(date, "The date must not be null");
-		Calendar c = Calendar.getInstance();
-		c.setLenient(false);
-		c.setTime(date);
-		c.add(calendarField, amount);
-		return c.getTime();
+	public static Date minus(Date date, TemporalAmount amount) {
+		Objects.requireNonNull(date, "The date must not be null");
+		Instant instant = date.toInstant()
+			.minus(amount);
+		return Date.from(instant);
 	}
 
 	/**
@@ -405,7 +422,7 @@ public class DateUtil {
 		if (format.getZone() == null) {
 			format = format.withZone(ZoneId.systemDefault());
 		}
-		Instant instant = format.parse(dateStr, Instant::from);
+		Instant instant = format.parse(dateStr, instantQuery());
 		return Date.from(instant);
 	}
 
@@ -421,7 +438,7 @@ public class DateUtil {
 	}
 
 	/**
-	 * 时间转 Instant
+	 * LocalDateTime 转 Instant
 	 *
 	 * @param dateTime 时间
 	 * @return Instant
@@ -431,7 +448,7 @@ public class DateUtil {
 	}
 
 	/**
-	 * Instant 转 时间
+	 * Instant 转 LocalDateTime
 	 *
 	 * @param instant Instant
 	 * @return Instant
@@ -451,7 +468,7 @@ public class DateUtil {
 	}
 
 	/**
-	 * 转换成 date
+	 * LocalDateTime 转换成 date
 	 *
 	 * @param dateTime LocalDateTime
 	 * @return Date
@@ -461,7 +478,7 @@ public class DateUtil {
 	}
 
 	/**
-	 * 转换成 date
+	 * LocalDate 转换成 date
 	 *
 	 * @param localDate LocalDate
 	 * @return Date
@@ -471,7 +488,7 @@ public class DateUtil {
 	}
 
 	/**
-	 * Converts local date time to Calendar.
+	 * LocalDateTime 转换成 Calendar.
 	 */
 	public static Calendar toCalendar(final LocalDateTime localDateTime) {
 		return GregorianCalendar.from(ZonedDateTime.of(localDateTime, ZoneId.systemDefault()));
@@ -766,6 +783,53 @@ public class DateUtil {
 			}
 		}
 		throw new DateTimeParseException("Unable to parse the date: " + text, text, -1);
+	}
+
+	/**
+	 * 支持日期、时间、时间日期格式转换成 Instant
+	 */
+	private static final TemporalQuery<Instant> INSTANT_QUERY = new TemporalQuery<Instant>() {
+
+		@Nullable
+		@Override
+		public Instant queryFrom(TemporalAccessor temporal) {
+			if (temporal.isSupported(INSTANT_SECONDS) && temporal.isSupported(NANO_OF_SECOND)) {
+				long instantSecs = temporal.getLong(INSTANT_SECONDS);
+				int nanoOfSecond = temporal.get(NANO_OF_SECOND);
+				return Instant.ofEpochSecond(instantSecs, nanoOfSecond);
+			}
+			// 获取时区
+			ZoneId zoneId = temporal.query(TemporalQueries.zoneId());
+			Objects.requireNonNull(zoneId, "Unable to obtain Instant from TemporalAccessor: zoneId is null.");
+			if (temporal.isSupported(NANO_OF_DAY)) {
+				return LocalTime.ofNanoOfDay(temporal.getLong(NANO_OF_DAY))
+					.atDate(DateUtil.EPOCH)
+					.atZone(zoneId)
+					.toInstant();
+			} else if (temporal.isSupported(EPOCH_DAY)) {
+				return LocalDate.ofEpochDay(temporal.getLong(EPOCH_DAY))
+					.atStartOfDay()
+					.atZone(zoneId)
+					.toInstant();
+			}
+			return null;
+		}
+
+		@Override
+		public String toString() {
+			return "Instant";
+		}
+	};
+
+	/**
+	 * 兼容 java 8
+	 * <p>
+	 * The epoch year {@code LocalDate}, '1970-01-01'.
+	 */
+	public static final LocalDate EPOCH = LocalDate.of(1970, 1, 1);
+
+	public static TemporalQuery<Instant> instantQuery() {
+		return INSTANT_QUERY;
 	}
 
 }

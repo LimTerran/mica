@@ -20,12 +20,15 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import lombok.RequiredArgsConstructor;
 import net.dreamlu.mica.core.utils.Exceptions;
+import net.dreamlu.mica.core.utils.JsonUtil;
 import okhttp3.Call;
 import okhttp3.Request;
+import okhttp3.Response;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -90,12 +93,35 @@ public class Exchange {
 	}
 
 	/**
+	 * Returns ok http response.
+	 *
+	 * <p>
+	 *     注意：body 不能读取，因为已经关闭掉了，建议还是直接用 onResponse 函数处理。
+	 * </p>
+	 *
+	 * @return Response
+	 */
+	public Response response() {
+		return onResponse(ResponseSpec::rawResponse);
+	}
+
+	/**
 	 * Returns body String.
 	 *
 	 * @return body String
 	 */
 	public String asString() {
 		return onResponse(ResponseSpec::asString);
+	}
+
+	/**
+	 * Returns body String.
+	 *
+	 * @param charset Charset
+	 * @return body String
+	 */
+	public String asString(Charset charset) {
+		return onResponse(responseSpec -> responseSpec.asString(charset));
 	}
 
 	/**
@@ -114,6 +140,27 @@ public class Exchange {
 	 */
 	public JsonNode asJsonNode() {
 		return onResponse(ResponseSpec::asJsonNode);
+	}
+
+	/**
+	 * jackson json path 语法读取节点
+	 *
+	 * @param jsonPtrExpr json path 表达式
+	 * @return JsonNode
+	 */
+	public JsonNode atJsonPath(String jsonPtrExpr) {
+		return this.asJsonNode().at(jsonPtrExpr);
+	}
+
+	/**
+	 * jackson json path 语法读取节点
+	 *
+	 * @param jsonPtrExpr json path 表达式
+	 * @param valueType   value value type
+	 * @return JsonNode
+	 */
+	public <T> T atJsonPathValue(String jsonPtrExpr, Class<T> valueType) {
+		return JsonUtil.convertValue(atJsonPath(jsonPtrExpr), valueType);
 	}
 
 	/**
@@ -171,6 +218,7 @@ public class Exchange {
 	 * toFile.
 	 *
 	 * @param file File
+	 * @return File
 	 */
 	public File toFile(File file) {
 		return onResponse(responseSpec -> responseSpec.toFile(file));
@@ -180,6 +228,7 @@ public class Exchange {
 	 * toFile.
 	 *
 	 * @param path Path
+	 * @return Path
 	 */
 	public Path toFile(Path path) {
 		return onResponse(responseSpec -> responseSpec.toFile(path));

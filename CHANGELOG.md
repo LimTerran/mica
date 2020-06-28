@@ -1,6 +1,36 @@
 # 变更记录
 
 ## 发行版本
+### v2.0.3-GA - 2020-06-25
+- :memo: 完善 mica 2.x 使用文档.
+- :sparkles: mica-http 微调日志，添加 system out log.
+- :sparkles: mica-http 添加 asString(Charset charset) 方法。
+- :sparkles: mica-http ResponseSpec 添加 json path 系列方法。
+- :sparkles: mica-http 优化 github #26 .
+- :sparkles: mica-ip2region 更新 ip2region.db 文件。
+- :sparkles: mica-core 优化 StringUtil，添加 startWith、endWith 方法.
+- :sparkles: mica-core 优化 DateUtil 优化 minus、plus months、years 提升5倍性能 gitee #IW2IM.
+- :sparkles: mica-redis 优化 MicaRedisCache 构造器 github #27.
+- :arrow_up: 升级 spring boot 到 2.3.1.RELEASE。
+
+### v2.0.2-GA - 2020-06-06
+- :sparkles: `release` 版本号格式为 `x.x.x-GA`，响应 `冷神` 的吐槽。
+- :bug: Fixing DateUtil.parse github #25。
+- :memo: mica-core 完善 javadoc，方便生成文档。
+- :sparkles: mica-core Once 添加函数方法。
+- :sparkles: mica-core 优化 WebUtil renderJson。
+- :sparkles: mica-http Slf4jLogger 改为枚举。
+- :sparkles: mica-core 添加 DecimalNum 方便金额计算。
+- :sparkles: mica-core 优化 JsonUtil。
+- :sparkles: 文案错误，redis prefixKeysWith 方法过时
+- :sparkles: mica-captcha 添加 CaptchaVo。
+- :arrow_up: spring boot to 2.3.0.RELEASE。
+- :arrow_up: mica-auto version to 1.2.3。
+- :arrow_up: okhttp version to 3.14.9。
+- :arrow_up: update knife4j to 2.0.3。
+- :arrow_up: spring cloud to Hoxton.SR5
+- :wrench: Github actions publish snapshot.
+
 ### v2.0.1.20200510
 - :sparkles: 开源 mica-ip2region 组件。
 - :zap: mica-core 优化 R.isNotSuccess 改为 isFail。

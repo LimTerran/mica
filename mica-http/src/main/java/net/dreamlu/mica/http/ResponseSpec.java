@@ -18,11 +18,14 @@ package net.dreamlu.mica.http;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.type.CollectionLikeType;
+import net.dreamlu.mica.core.utils.JsonUtil;
 import okhttp3.*;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -109,6 +112,14 @@ public interface ResponseSpec {
 	String asString();
 
 	/**
+	 * Returns body String.
+	 *
+	 * @param charset Charset
+	 * @return body String
+	 */
+	String asString(Charset charset);
+
+	/**
 	 * Returns body to byte arrays.
 	 *
 	 * @return byte arrays
@@ -128,6 +139,50 @@ public interface ResponseSpec {
 	 * @return JsonNode
 	 */
 	JsonNode asJsonNode();
+
+	/**
+	 * jackson json path 语法读取节点
+	 *
+	 * @param jsonPtrExpr json path 表达式
+	 * @return JsonNode
+	 */
+	default JsonNode atJsonPath(String jsonPtrExpr) {
+		return this.asJsonNode().at(jsonPtrExpr);
+	}
+
+	/**
+	 * jackson json path 语法读取节点
+	 *
+	 * @param jsonPtrExpr json path 表达式
+	 * @param valueType   value value type
+	 * @return JsonNode
+	 */
+	default <T> T atJsonPathValue(String jsonPtrExpr, Class<T> valueType) {
+		return JsonUtil.convertValue(atJsonPath(jsonPtrExpr), valueType);
+	}
+
+	/**
+	 * jackson json path 语法读取节点
+	 *
+	 * @param jsonPtrExpr   json path 表达式
+	 * @param typeReference value Type Reference
+	 * @return JsonNode
+	 */
+	default <T> T atJsonPathValue(String jsonPtrExpr, TypeReference<T> typeReference) {
+		return JsonUtil.convertValue(atJsonPath(jsonPtrExpr), typeReference);
+	}
+
+	/**
+	 * jackson json path 语法读取节点
+	 *
+	 * @param jsonPtrExpr json path 表达式
+	 * @param valueType   value value type
+	 * @return List
+	 */
+	default <T> List<T> atJsonPathList(String jsonPtrExpr, Class<T> valueType) {
+		CollectionLikeType collectionLikeType = JsonUtil.getListType(valueType);
+		return JsonUtil.convertValue(atJsonPath(jsonPtrExpr), collectionLikeType);
+	}
 
 	/**
 	 * Returns body to Object.
@@ -176,6 +231,7 @@ public interface ResponseSpec {
 	 * toFile.
 	 *
 	 * @param file File
+	 * @return File
 	 */
 	File toFile(File file);
 
@@ -183,6 +239,7 @@ public interface ResponseSpec {
 	 * toFile.
 	 *
 	 * @param path Path
+	 * @return Path
 	 */
 	Path toFile(Path path);
 
