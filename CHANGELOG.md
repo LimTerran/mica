@@ -1,6 +1,90 @@
 # 变更记录
 
 ## 发行版本
+### v2.1.0-GA - 2020-12-13
+- :sparkles: mica-bom 添加 mica-weixin。
+- :sparkles: mica-redis 添加 redis key 失效事件配置。
+- :sparkles: mica-swagger 添加 SwaggerCustomizer，用于自定义配置。
+- :sparkles: mica-swagger 添加 oauth2 认证配置。
+- :sparkles: mica-http 添加流上传，完善文档。
+- :sparkles: mica-core 添加 GeoUtil。
+- :sparkles: mica-core StringUtil 优化 format 方法参数泛型。
+- :sparkles: mica-core JsonUtil 添加参数化类型 getParametricType 方法。
+- :arrow_up: 升级 knife4j 到 3.0.2。
+- :arrow_up: 升级 druid 到 1.2.3。
+- :arrow_up: 升级 spring boot 到 2.3.7.RELEASE。
+
+### v2.0.9-GA - 2020-11-15
+- :sparkles: mica-xss 可自定义 XssCleaner 接口。
+- :sparkles: mica-xss 日志统一调整为 debug。
+- :sparkles: mica-xss 默认拦截 /** #I24753 。
+- :sparkles: mica-ip2region 更新 db 文件。
+- :sparkles: mica-redis 优化 redis scan。
+- :sparkles: mica-redis 添加强制依赖 commons-pool2。
+- :arrow_up: mica-bom 添加 druid 到 bom。
+- :sparkles: mica-core 完善 ReflectUtil。
+- :arrow_up: 升级 spring cloud 到 Hoxton.SR9。
+- :arrow_up: 升级 spring boot 到 2.3.6.RELEASE。
+
+### v2.0.8-GA - 2020-10-20
+- :sparkles: mica-metrics 添加对 druid 连接池的支持。
+- :sparkles: mica-core StringUtil 添加格式化执行时间方法。
+- :sparkles: mica-core CollectionUtil 优化泛型。
+- :sparkles: mica-core 完善 FileUtil，方便使用
+- :sparkles: mica-core 完善 JsonUtil，方便使用。
+- :sparkles: mica-core 完善 DateUtil，方便使用。
+- :sparkles: mica-core 抽取 Pkcs7Encoder。
+- :sparkles: mica-core Validated group extends Default.
+- :memo: 修复文档错误.
+- :memo: 添加 mica 生态连接。
+
+### v2.0.7-GA - 2020-09-25
+- :memo: 文档完善，详见：http://wiki.dreamlu.net
+- :sparkles: mica-core Once 添加方法。
+- :sparkles: 优化 mica-jobs 模块，默认开启。
+- :sparkles: 添加 DesensitizationUtil 脱敏工具类。
+- :sparkles: 添加 commons-lang 中的字符串系列操作方法。
+- :sparkles: 优化 mica-redis getCounter。
+- :sparkles: mica-redis 优化 incrBy、decrBy，添加带超时的方法。
+- :sparkles: mica-redis 优化 jdk 序列化。
+- :arrow_up: Upgrading dependencies. spring boot 2.3.4
+- :arrow_up: 升级到 Spring cloud Hoxton.SR8。
+
+### v2.0.6-GA - 2020-08-22
+- :sparkles: mica-core BeanUtil 添加 toNewMap 方法。
+- :sparkles: 优化 mica-core MicaConstant 中添加 mdc accountId。
+- :sparkles: 优化 mica-core 补上 LuTool 中的 Bean diff。
+- :sparkles: 优化 mica-core DateUtil 添加部分方法。
+- :sparkles: mica-captcha graphics dispose.
+- :sparkles: mica-http 文档添加https证书示例。
+- :arrow_up: 升级 spring boot 到 2.3.3.RELEASE。
+
+### v2.0.5-GA - 2020-08-09
+- :sparkles: 添加 mica-metrics 模块，用于使用 prometheus 进行指标收集，已支持 undertow、sentinel。
+- :sparkles: mica-redis add scan 和 sscan。
+- :memo: mica-redis 修复使用文档。 Gitee pr by @醉酒的蝴蝶zzz/N/A
+- :sparkles: mica-core 添加 RsaHelper RSA PEM格式秘钥对的解析和导出，Gitee pr by @caiqiyuan
+- :sparkles: mica-core RsaUtil 完善加解密方法。
+- :sparkles: mica-core 添加忽略序列化 id 的 jdk 对象序列化。
+- :sparkles: mica-core 添加 CheckedPredicate。
+- :sparkles: mica-core 添加 json 格式校验。
+- :bug: 修复部分 sonarcloud 问题。
+- :arrow_up: 升级 spring cloud 到 Hoxton.SR7。
+
+### v2.0.4-GA - 2020-07-25
+- :memo: 完善文档.
+- :sparkles: mica-http 添加 pathParam 方法。
+- :sparkles: mica-ip2region IpInfo 添加 getAddress 方法。
+- :sparkles: 添加 mica-xss 模块.
+- :sparkles: mica-core BeanUtil add deepClone method.
+- :sparkles: mica-http 使用 CompletableFuture 优化异步 github #29 。
+- :sparkles: mica-core INetUtil 添加内网 ip 判断。
+- :sparkles: mica-spider 修复 readme，简化使用。
+- :arrow_up: 升级 spring cloud 到 Hoxton.SR6。
+- :arrow_up: 升级 spring boot 到 2.3.2.RELEASE。
+- :arrow_up: 升级 knife4j 到 2.0.4。
+- :arrow_up: 升级 mica-auto 到 1.2.5。
+
 ### v2.0.3-GA - 2020-06-25
 - :memo: 完善 mica 2.x 使用文档.
 - :sparkles: mica-http 微调日志，添加 system out log.

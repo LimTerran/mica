@@ -365,7 +365,7 @@ public class $ {
 	 * @param params  转换所需的键值对集合
 	 * @return 转换后的字符串
 	 */
-	public static String format(@Nullable String message, @Nullable Map<String, Object> params) {
+	public static String format(@Nullable String message, @Nullable Map<String, ?> params) {
 		return StringUtil.format(message, params);
 	}
 
@@ -2363,13 +2363,23 @@ public class $ {
 	}
 
 	/**
-	 * 将对象装成map形式
+	 * 将对象装成map形式，map 不可写
 	 *
 	 * @param bean 源对象
 	 * @return {Map}
 	 */
 	public static Map<String, Object> toMap(@Nullable Object bean) {
 		return BeanUtil.toMap(bean);
+	}
+
+	/**
+	 * 将对象装成map形式，map 可写
+	 *
+	 * @param bean 源对象
+	 * @return {Map}
+	 */
+	public static Map<String, Object> toNewMap(@Nullable Object bean) {
+		return BeanUtil.toNewMap(bean);
 	}
 
 	/**

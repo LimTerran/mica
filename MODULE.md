@@ -6,6 +6,12 @@
 
 `文档地址`：[https://gitee.com/596392912/mica-auto](https://gitee.com/596392912/mica-auto)
 
+## mica-weixin
+1. 公众号消息处理、api接口。
+2. 小程序消息处理。
+
+`文档地址`：[https://gitee.com/596392912/mica-weixin](https://gitee.com/596392912/mica-weixin)
+
 ## mica-core
 - 常用工具包，基于 `Spring-core` 扩展增强，无其他依赖。
 - 增强 cglib Bean copy，高性能（接近直接 get set），支持链式 bean，支持自动类型转换 。
@@ -61,3 +67,16 @@
 - xxl job stater，方便使用
 
 `文档地址`：[mica-jobs](mica-jobs/README.md)
+
+## mica-xss
+- 对表单绑定的字符串类型进行 xss 处理。
+- 对 json 字符串数据进行 xss 处理。
+- 提供路由和控制器方法级别的放行规则。
+
+`文档地址`：[mica-xss](mica-xss/README.md)
+
+## mica-metrics
+- sentinel 指标收集。
+- undertow 指标收集。
+
+`文档地址`：[mica-metrics](mica-metrics/README.md)

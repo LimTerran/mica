@@ -20,6 +20,7 @@ import lombok.experimental.UtilityClass;
 import org.springframework.lang.Nullable;
 
 import java.time.*;
+import java.time.chrono.ChronoLocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.*;
@@ -310,10 +311,7 @@ public class DateUtil {
 	 */
 	@Nullable
 	public static String formatDateTime(@Nullable Date date) {
-		if (date == null) {
-			return null;
-		}
-		return DATETIME_FORMATTER.format(date.toInstant());
+		return format(date, DATETIME_FORMATTER);
 	}
 
 	/**
@@ -324,10 +322,7 @@ public class DateUtil {
 	 */
 	@Nullable
 	public static String formatDate(@Nullable Date date) {
-		if (date == null) {
-			return null;
-		}
-		return DATE_FORMATTER.format(date.toInstant());
+		return format(date, DATE_FORMATTER);
 	}
 
 	/**
@@ -338,10 +333,7 @@ public class DateUtil {
 	 */
 	@Nullable
 	public static String formatTime(@Nullable Date date) {
-		if (date == null) {
-			return null;
-		}
-		return TIME_FORMATTER.format(date.toInstant());
+		return format(date, TIME_FORMATTER);
 	}
 
 	/**
@@ -353,10 +345,38 @@ public class DateUtil {
 	 */
 	@Nullable
 	public static String format(@Nullable Date date, String pattern) {
+		return format(date, DateTimeFormatter.ofPattern(pattern));
+	}
+
+	/**
+	 * 日期格式化
+	 *
+	 * @param date      时间
+	 * @param formatter 格式化
+	 * @return 格式化后的时间
+	 */
+	@Nullable
+	public static String format(@Nullable Date date, DateTimeFormatter formatter) {
 		if (date == null) {
 			return null;
 		}
-		return DateTimeFormatter.ofPattern(pattern).withZone(ZoneId.systemDefault()).format(date.toInstant());
+		return format(date.toInstant(), formatter);
+	}
+
+	/**
+	 * 日期格式化
+	 *
+	 * @param instant   时间
+	 * @param formatter 格式化
+	 * @return 格式化后的时间
+	 */
+	@Nullable
+	public static String format(Instant instant, DateTimeFormatter formatter) {
+		ZoneId zone = formatter.getZone();
+		if (zone == null) {
+			return formatter.withZone(ZoneId.systemDefault()).format(instant);
+		}
+		return formatter.format(instant);
 	}
 
 	/**
@@ -458,6 +478,26 @@ public class DateUtil {
 	}
 
 	/**
+	 * 某天开始时间 yyyy-MM-dd 00:00:00
+	 *
+	 * @param localDate LocalDate
+	 * @return Instant
+	 */
+	public static LocalDateTime toStartOfDay(LocalDate localDate) {
+		return localDate.atStartOfDay();
+	}
+
+	/**
+	 * 某天结束时间 yyyy-MM-dd 23:59:59
+	 *
+	 * @param localDate LocalDate
+	 * @return Instant
+	 */
+	public static LocalDateTime toEndOfDay(LocalDate localDate) {
+		return LocalDateTime.of(localDate, LocalTime.MAX);
+	}
+
+	/**
 	 * Date 转 LocalDateTime
 	 *
 	 * @param date Date
@@ -554,6 +594,39 @@ public class DateUtil {
 	 */
 	public static LocalDateTime fromMilliseconds(final long milliseconds) {
 		return LocalDateTime.ofInstant(Instant.ofEpochMilli(milliseconds), ZoneId.systemDefault());
+	}
+
+	/**
+	 * 判断 A 的时间是否在 B 的时间 "之后"
+	 *
+	 * @param self ChronoLocalDateTime
+	 * @param other ChronoLocalDateTime
+	 * @return {boolean}
+	 */
+	public static boolean isAfter(ChronoLocalDateTime<?> self, ChronoLocalDateTime<?> other) {
+		return self.isAfter(other);
+	}
+
+	/**
+	 * 判断 A 的时间是否在 B 的时间 "之前"
+	 *
+	 * @param self ChronoLocalDateTime
+	 * @param other ChronoLocalDateTime
+	 * @return {boolean}
+	 */
+	public static boolean isBefore(ChronoLocalDateTime<?> self, ChronoLocalDateTime<?> other) {
+		return self.isBefore(other);
+	}
+
+	/**
+	 * 判断 A 的时间是否与 B 的时间 "相同"
+	 *
+	 * @param self ChronoLocalDateTime
+	 * @param other ChronoLocalDateTime
+	 * @return {boolean}
+	 */
+	public static boolean isEqual(ChronoLocalDateTime<?> self, ChronoLocalDateTime<?> other) {
+		return self.isEqual(other);
 	}
 
 	/**

@@ -17,6 +17,7 @@
 package net.dreamlu;
 
 import net.dreamlu.mica.http.HttpRequest;
+import net.dreamlu.mica.http.LogLevel;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -27,7 +28,7 @@ public class HttpRequestProxyTest {
 	public void test1() {
 		// 代理都不可用
 		HttpRequest.get("https://www.baidu.com")
-			.log()
+			.useConsoleLog(LogLevel.BASIC)
 			.retry()
 			.proxySelector(new MicaProxySelector())
 			.execute()

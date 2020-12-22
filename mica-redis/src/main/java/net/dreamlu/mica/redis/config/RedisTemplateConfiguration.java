@@ -34,7 +34,6 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 /**
  * RedisTemplate  配置
@@ -42,7 +41,7 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * @author L.cm
  */
 @EnableCaching
-@Configuration
+@Configuration(proxyBeanMethods = false)
 @AutoConfigureBefore(RedisAutoConfiguration.class)
 @EnableConfigurationProperties(MicaRedisProperties.class)
 public class RedisTemplateConfiguration {
@@ -58,7 +57,8 @@ public class RedisTemplateConfiguration {
 												   ObjectProvider<ObjectMapper> objectProvider) {
 		MicaRedisProperties.SerializerType serializerType = properties.getSerializerType();
 		if (MicaRedisProperties.SerializerType.JDK == serializerType) {
-			return new JdkSerializationRedisSerializer();
+			ClassLoader classLoader = this.getClass().getClassLoader();
+			return new JdkSerializationRedisSerializer(classLoader);
 		}
 		// jackson findAndRegisterModules，use copy
 		ObjectMapper objectMapper = objectProvider.getIfAvailable(ObjectMapper::new).copy();
@@ -76,7 +76,7 @@ public class RedisTemplateConfiguration {
 		RedisConnectionFactory redisConnectionFactory, RedisSerializer<Object> redisSerializer) {
 		RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
 		// key 序列化
-		StringRedisSerializer keySerializer = new StringRedisSerializer();
+		RedisSerializer<String> keySerializer = RedisSerializer.string();
 		redisTemplate.setKeySerializer(keySerializer);
 		redisTemplate.setHashKeySerializer(keySerializer);
 		// value 序列化

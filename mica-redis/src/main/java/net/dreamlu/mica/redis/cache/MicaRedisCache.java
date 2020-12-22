@@ -17,13 +17,18 @@
 package net.dreamlu.mica.redis.cache;
 
 import lombok.Getter;
+import net.dreamlu.mica.core.tuple.Pair;
 import net.dreamlu.mica.core.utils.CollectionUtil;
+import net.dreamlu.mica.core.utils.Exceptions;
 import org.springframework.data.redis.core.*;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.lang.Nullable;
 
+import java.io.IOException;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -197,6 +202,158 @@ public class MicaRedisCache {
 	}
 
 	/**
+	 * redis scan
+	 *
+	 * @param pattern 匹配表达式
+	 * @return 扫描结果
+	 */
+	public Set<String> scan(@Nullable String pattern) {
+		final Set<String> keySet = new HashSet<>();
+		scan(pattern, keySet::add);
+		return keySet;
+	}
+
+	/**
+	 * redis scan
+	 *
+	 * @param pattern 匹配表达式
+	 * @param count   一次扫描的数量
+	 * @return 扫描结果
+	 */
+	public Pair<Long, Set<String>> scan(@Nullable String pattern, @Nullable Long count) {
+		final Set<String> keySet = new HashSet<>();
+		RedisSerializer<String> keySerializer = (RedisSerializer<String>) redisTemplate.getKeySerializer();
+		return redisTemplate.execute((RedisCallback<Pair<Long, Set<String>>>) action -> {
+			ScanOptions options = ScanOptions.scanOptions()
+				.match(pattern)
+				.count(count)
+				.build();
+			try (Cursor<byte[]> cursor = action.scan(options)) {
+				cursor.forEachRemaining((item) -> keySet.add(keySerializer.deserialize(item)));
+				return Pair.create(cursor.getPosition(), keySet);
+			} catch (IOException e) {
+				throw Exceptions.unchecked(e);
+			}
+		});
+	}
+
+	/**
+	 * redis scan
+	 *
+	 * @param pattern 匹配表达式
+	 * @param consumer 消费者
+	 * @return 扫描结果
+	 */
+	public void scan(@Nullable String pattern, Consumer<String> consumer) {
+		scan(pattern, null, consumer);
+	}
+
+	/**
+	 * redis scan
+	 *
+	 * @param pattern 匹配表达式
+	 * @param count   一次扫描的数量
+	 * @param consumer 消费者
+	 * @return 扫描结果
+	 */
+	public void scan(@Nullable String pattern, @Nullable Long count, Consumer<String> consumer) {
+		RedisSerializer<String> keySerializer = (RedisSerializer<String>) redisTemplate.getKeySerializer();
+		redisTemplate.execute((RedisCallback<Object>) action -> {
+			ScanOptions options = ScanOptions.scanOptions()
+				.match(pattern)
+				.count(count)
+				.build();
+			try (Cursor<byte[]> cursor = action.scan(options)) {
+				cursor.forEachRemaining((item) -> {
+					String redisKey = keySerializer.deserialize(item);
+					consumer.accept(redisKey);
+				});
+			} catch (IOException e) {
+				throw Exceptions.unchecked(e);
+			}
+			return null;
+		});
+	}
+
+	/**
+	 * redis sscan
+	 *
+	 * @param key key
+	 * @param pattern 匹配表达式
+	 * @return 扫描结果
+	 */
+	public Set<String> sScan(String key, @Nullable String pattern) {
+		final Set<String> keySet = new HashSet<>();
+		sScan(key, pattern, keySet::add);
+		return keySet;
+	}
+
+	/**
+	 * redis sscan
+	 *
+	 * @param key key
+	 * @param pattern 匹配表达式
+	 * @param count   一次扫描的数量
+	 * @return 扫描结果
+	 */
+	public Pair<Long, Set<String>> sScan(String key, @Nullable String pattern, @Nullable Long count) {
+		final Set<String> keySet = new HashSet<>();
+		RedisSerializer<String> keySerializer = (RedisSerializer<String>) redisTemplate.getKeySerializer();
+		return redisTemplate.execute((RedisCallback<Pair<Long, Set<String>>>) action -> {
+			ScanOptions options = ScanOptions.scanOptions()
+				.match(pattern)
+				.count(count)
+				.build();
+			try (Cursor<byte[]> cursor = action.sScan(keySerializer.serialize(key), options)) {
+				cursor.forEachRemaining((item) -> keySet.add(keySerializer.deserialize(item)));
+				return Pair.create(cursor.getPosition(), keySet);
+			} catch (IOException e) {
+				throw Exceptions.unchecked(e);
+			}
+		});
+	}
+
+	/**
+	 * redis sscan
+	 *
+	 * @param key key
+	 * @param pattern 匹配表达式
+	 * @param consumer    consumer
+	 * @return 扫描结果
+	 */
+	public void sScan(String key, @Nullable String pattern, Consumer<String> consumer) {
+		sScan(key, pattern, null, consumer);
+	}
+
+	/**
+	 * redis sscan
+	 *
+	 * @param key key
+	 * @param pattern 匹配表达式
+	 * @param count   一次扫描的数量
+	 * @param consumer    consumer
+	 * @return 扫描结果
+	 */
+	public void sScan(String key, @Nullable String pattern, @Nullable Long count, Consumer<String> consumer) {
+		RedisSerializer<String> keySerializer = (RedisSerializer<String>) redisTemplate.getKeySerializer();
+		redisTemplate.execute((RedisCallback<Object>) action -> {
+			ScanOptions options = ScanOptions.scanOptions()
+				.match(pattern)
+				.count(count)
+				.build();
+			try (Cursor<byte[]> cursor = action.sScan(keySerializer.serialize(key), options)) {
+				cursor.forEachRemaining((item) -> {
+					String redisKey = keySerializer.deserialize(item);
+					consumer.accept(redisKey);
+				});
+			} catch (IOException e) {
+				throw Exceptions.unchecked(e);
+			}
+			return null;
+		});
+	}
+
+	/**
 	 * 同时设置一个或多个 key-value 对。
 	 * 如果某个给定 key 已经存在，那么 MSET 会用新值覆盖原来的旧值，如果这不是你所希望的效果，请考虑使用 MSETNX 命令：它只会在所有给定 key 都不存在的情况下进行设置操作。
 	 * MSET 是一个原子性(atomic)操作，所有给定 key 都会在同一时间内被设置，某些给定 key 被更新而另一些给定 key 没有改变的情况，不可能发生。
@@ -250,6 +407,24 @@ public class MicaRedisCache {
 	}
 
 	/**
+	 * 将 key 所储存的值减去减量 decrement 。
+	 * 如果 key 不存在，那么 key 的值会先被初始化为 0 ，然后再执行 DECRBY 操作。
+	 * 如果值包含错误的类型，或字符串类型的值不能表示为数字，那么返回一个错误。
+	 * 本操作的值限制在 64 位(bit)有符号数字表示之内。
+	 * 关于更多递增(increment) / 递减(decrement)操作的更多信息，请参见 INCR 命令。
+	 */
+	public Long decrBy(String key, long longValue, long seconds) {
+		RedisSerializer<String> keySerializer = (RedisSerializer<String>) redisTemplate.getKeySerializer();
+		byte[] serializedKey = keySerializer.serialize(key);
+		List<Object> result = redisTemplate.executePipelined((RedisCallback<Long>) action -> {
+			Long data = action.decrBy(serializedKey, longValue);
+			action.expire(serializedKey, seconds);
+			return data;
+		});
+		return (Long) result.get(0);
+	}
+
+	/**
 	 * 将 key 中储存的数字值增一。
 	 * 如果 key 不存在，那么 key 的值会先被初始化为 0 ，然后再执行 INCR 操作。
 	 * 如果值包含错误的类型，或字符串类型的值不能表示为数字，那么返回一个错误。
@@ -271,10 +446,58 @@ public class MicaRedisCache {
 	}
 
 	/**
-	 * 获取记数器的值
+	 * 将 key 所储存的值加上增量 increment 。
+	 * 如果 key 不存在，那么 key 的值会先被初始化为 0 ，然后再执行 INCRBY 命令。
+	 * 如果值包含错误的类型，或字符串类型的值不能表示为数字，那么返回一个错误。
+	 * 本操作的值限制在 64 位(bit)有符号数字表示之内。
+	 * 关于递增(increment) / 递减(decrement)操作的更多信息，参见 INCR 命令。
+	 */
+	public Long incrBy(String key, long longValue, long seconds) {
+		RedisSerializer<String> keySerializer = (RedisSerializer<String>) redisTemplate.getKeySerializer();
+		byte[] serializedKey = keySerializer.serialize(key);
+		List<Object> result = redisTemplate.executePipelined((RedisCallback<Long>) action -> {
+			Long data = action.incrBy(serializedKey, longValue);
+			action.expire(serializedKey, seconds);
+			return data;
+		});
+		return (Long) result.get(0);
+	}
+
+	/**
+	 * 获取记数器的值，用于获取 incr、incrBy 的值
+	 *
+	 * @param key key
 	 */
 	public Long getCounter(String key) {
-		return Long.valueOf(String.valueOf(valueOps.get(key)));
+		RedisSerializer<String> keySerializer = (RedisSerializer<String>) redisTemplate.getKeySerializer();
+		return redisTemplate.execute((RedisCallback<Long>) action -> {
+			byte[] value = action.get(keySerializer.serialize(key));
+			return Long.valueOf(new String(value));
+		});
+	}
+
+	/**
+	 * 获取记数器的值，用于初始化获取 incr、incrBy 的值
+	 *
+	 * @param key key
+	 * @param seconds 超时时间
+	 * @param loader 加载器
+	 */
+	public Long getCounter(String key, long seconds, Supplier<Long> loader) {
+		RedisSerializer<String> keySerializer = (RedisSerializer<String>) redisTemplate.getKeySerializer();
+		return redisTemplate.execute((RedisCallback<Long>) action -> {
+			byte[] keyBytes = keySerializer.serialize(key);
+			byte[] value = action.get(keyBytes);
+			long longValue;
+			if (value != null) {
+				longValue = Long.valueOf(new String(value));
+			} else {
+				Long loaderValue = loader.get();
+				longValue = loaderValue == null ? 0 : loaderValue;
+				action.setEx(keyBytes, seconds, String.valueOf(longValue).getBytes());
+			}
+			return longValue;
+		});
 	}
 
 	/**
@@ -342,7 +565,7 @@ public class MicaRedisCache {
 	/**
 	 * 这个命令和 EXPIRE 命令的作用类似，但是它以毫秒为单位设置 key 的生存时间，而不像 EXPIRE 命令那样，以秒为单位。
 	 */
-	public Boolean pexpire(String key, long milliseconds) {
+	public Boolean pExpire(String key, long milliseconds) {
 		return redisTemplate.expire(key, milliseconds, TimeUnit.MILLISECONDS);
 	}
 

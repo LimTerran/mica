@@ -3,7 +3,8 @@
 具体可见 [《震惊，java8 Nashorn和laytpl居然能擦出这样火花！》](https://my.oschina.net/qq596392912/blog/872813)
 
 ## 注意
-jmh 实测性能不是很出色，约为 `Thymeleaf` 的 `1/2` 适合用于对性能不是特别高的场景。例如：代码生成等。
+- jmh 实测性能不是很出色，约为 `Thymeleaf` 的 `1/2` 适合用于对性能不是特别高的场景。例如：代码生成等。
+- java15 中会移除 Nashorn（[JEP 372:Remove the Nashorn JavaScript Engine](https://openjdk.java.net/projects/jdk/15/)）
 
 ## 添加依赖
 ### maven
@@ -19,6 +20,19 @@ jmh 实测性能不是很出色，约为 `Thymeleaf` 的 `1/2` 适合用于对�
 ```groovy
 compile("net.dreamlu:mica-laytpl:${version}")
 ```
+
+## 配置
+| 配置项 | 默认值 | 说明 |
+| ----- | ------ | ------ |
+| mica.laytpl.cache | true | 缓存模板，默认：true |
+| mica.laytpl.close | }} | 模板分隔符结束，默认：}} |
+| mica.laytpl.date-pattern |  | Date 日期格式化，默认："yyyy-MM-dd HH:mm:ss" |
+| mica.laytpl.local-date-pattern |  | java8 LocalDate日期格式化，默认："yyyy-MM-dd" |
+| mica.laytpl.local-date-time-pattern |  | java8 LocalDateTime日期时间格式化，默认："yyyy-MM-dd HH:mm:ss" |
+| mica.laytpl.local-time-pattern |  | java8 LocalTime时间格式化，默认："HH:mm:ss" |
+| mica.laytpl.num-pattern | #.00 | 数字格式化，默认：#.00 |
+| mica.laytpl.open | {{ | 模板分隔符开始，默认：{{ |
+| mica.laytpl.prefix | classpath:templates/tpl/ | 模板前缀，默认：classpath:templates/tpl/ |
 
 ## 使用
 ```java

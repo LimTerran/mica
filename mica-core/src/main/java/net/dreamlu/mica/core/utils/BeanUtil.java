@@ -27,7 +27,12 @@ import org.springframework.beans.BeansException;
 import org.springframework.beans.PropertyAccessorFactory;
 import org.springframework.cglib.beans.BeanGenerator;
 import org.springframework.lang.Nullable;
+import org.springframework.util.Assert;
+import org.springframework.util.FastByteArrayOutputStream;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.*;
 
 /**
@@ -95,7 +100,7 @@ public class BeanUtil extends org.springframework.beans.BeanUtils {
 	}
 
 	/**
-	 * 深复制
+	 * 浅拷贝
 	 *
 	 * <p>
 	 * 支持 map bean
@@ -105,13 +110,39 @@ public class BeanUtil extends org.springframework.beans.BeanUtils {
 	 * @param <T>    泛型标记
 	 * @return T
 	 */
-	@SuppressWarnings("unchecked")
 	@Nullable
+	@SuppressWarnings("unchecked")
 	public static <T> T clone(@Nullable T source) {
 		if (source == null) {
 			return null;
 		}
 		return (T) BeanUtil.copy(source, source.getClass());
+	}
+
+	/**
+	 * 深度拷贝
+	 *
+	 * @param source 待拷贝的对象
+	 * @return 拷贝之后的对象
+	 */
+	@Nullable
+	@SuppressWarnings("unchecked")
+	public static <T> T deepClone(@Nullable T source) {
+		if (source == null) {
+			return null;
+		}
+		FastByteArrayOutputStream fBos = new FastByteArrayOutputStream(1024);
+		try (ObjectOutputStream oos = new ObjectOutputStream(fBos)) {
+			oos.writeObject(source);
+			oos.flush();
+		} catch (IOException ex) {
+			throw new IllegalArgumentException("Failed to serialize object of type: " + source.getClass(), ex);
+		}
+		try (ObjectInputStream ois = new ObjectInputStream(fBos.getInputStream())) {
+			return (T) ois.readObject();
+		} catch (IOException | ClassNotFoundException ex) {
+			throw new IllegalArgumentException("Failed to deserialize object", ex);
+		}
 	}
 
 	/**
@@ -375,7 +406,7 @@ public class BeanUtil extends org.springframework.beans.BeanUtils {
 	}
 
 	/**
-	 * 将对象装成map形式
+	 * 将对象装成map形式，map 不可写
 	 *
 	 * @param bean 源对象
 	 * @return {Map}
@@ -386,6 +417,16 @@ public class BeanUtil extends org.springframework.beans.BeanUtils {
 			return new HashMap<>(0);
 		}
 		return MicaBeanMap.create(bean);
+	}
+
+	/**
+	 * 将对象装成map形式，map 可写
+	 *
+	 * @param bean 源对象
+	 * @return {Map}
+	 */
+	public static Map<String, Object> toNewMap(@Nullable Object bean) {
+		return new HashMap<>(toMap(bean));
 	}
 
 	/**
@@ -439,6 +480,44 @@ public class BeanUtil extends org.springframework.beans.BeanUtils {
 			generator.addProperty(prop.getName(), prop.getType());
 		}
 		return generator.create();
+	}
+
+	/**
+	 * 比较对象
+	 *
+	 * @param src  源对象
+	 * @param dist 新对象
+	 * @return {BeanDiff}
+	 */
+	public static BeanDiff diff(final Object src, final Object dist) {
+		Assert.notNull(src, "diff Object src is null.");
+		Assert.notNull(src, "diff Object dist is null.");
+		return diff(BeanUtil.toMap(src), BeanUtil.toMap(dist));
+	}
+
+	/**
+	 * 比较Map
+	 *
+	 * @param src  源Map
+	 * @param dist 新Map
+	 * @return {BeanDiff}
+	 */
+	public static BeanDiff diff(final Map<String, Object> src, final Map<String, Object> dist) {
+		Assert.notNull(src, "diff Map src is null.");
+		Assert.notNull(src, "diff Map dist is null.");
+		// 改变
+		Map<String, Object> difference = new HashMap<>();
+		difference.putAll(src);
+		difference.putAll(dist);
+		difference.entrySet().removeAll(src.entrySet());
+		// 老值
+		Map<String, Object> oldValues = new HashMap<>();
+		difference.keySet().forEach((k) -> oldValues.put(k, src.get(k)));
+		BeanDiff diff = new BeanDiff();
+		diff.getFields().addAll(difference.keySet());
+		diff.getOldValues().putAll(oldValues);
+		diff.getNewValues().putAll(difference);
+		return diff;
 	}
 
 }

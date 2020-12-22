@@ -16,7 +16,7 @@
 
 @NonNullApi
 @NonNullFields
-package net.dreamlu.mica.swagger;
+package net.dreamlu.mica.xss.config;
 
 import org.springframework.lang.NonNullApi;
 import org.springframework.lang.NonNullFields;
